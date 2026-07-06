@@ -75,7 +75,9 @@ def main():
         save_strategy="epoch" if args.max_steps < 0 else "no",
         eval_strategy="epoch" if args.val else "no",
         max_length=args.max_seq_len,
-        packing=True,
+        # packing off: sdpa (no flash-attn here) can cross-contaminate packed
+        # samples, and the dataset is small enough that packing buys nothing
+        packing=False,
         report_to=[],
     )
 

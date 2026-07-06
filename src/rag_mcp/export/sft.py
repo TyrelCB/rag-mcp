@@ -23,6 +23,18 @@ TOOL_RESULT_MAX = 2000
 MAX_EXAMPLE_TOKENS = 16000  # ~chars/4; split at user-turn boundaries past this
 
 
+def _args_dict(raw) -> dict:
+    """Chat templates (Qwen et al.) iterate tool-call arguments as a mapping,
+    so emit dicts rather than OpenAI-wire JSON strings."""
+    if isinstance(raw, dict):
+        return raw
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else {"_raw": raw}
+    except (json.JSONDecodeError, TypeError):
+        return {"_raw": str(raw)}
+
+
 def _scrub_count(text: str, stats: dict) -> str:
     out, counts = scrub(text)
     for k, v in counts.items():
@@ -87,7 +99,9 @@ def _claude_messages(path: Path, stats: dict) -> list[dict]:
                         "type": "function",
                         "function": {
                             "name": b.get("name", ""),
-                            "arguments": _scrub_count(json.dumps(b.get("input", {})), stats),
+                            "arguments": _args_dict(
+                                _scrub_count(json.dumps(b.get("input", {})), stats)
+                            ),
                         },
                     })
             msg = {"role": "assistant",
@@ -126,9 +140,12 @@ def _hermes_messages(path: Path, stats: dict) -> list[dict]:
         elif role == "assistant":
             msg = {"role": "assistant", "content": _scrub_count(content, stats)}
             if row.get("tool_calls"):
-                msg["tool_calls"] = json.loads(
-                    _scrub_count(json.dumps(row["tool_calls"]), stats)
-                )
+                calls = json.loads(_scrub_count(json.dumps(row["tool_calls"]), stats))
+                for tc in calls:
+                    fn = tc.get("function") if isinstance(tc, dict) else None
+                    if isinstance(fn, dict):
+                        fn["arguments"] = _args_dict(fn.get("arguments"))
+                msg["tool_calls"] = calls
             if msg["content"] or msg.get("tool_calls"):
                 msgs.append(msg)
         elif role == "tool" and content:
