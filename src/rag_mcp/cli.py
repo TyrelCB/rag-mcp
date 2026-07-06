@@ -95,7 +95,7 @@ def export(
     min_turns: int = typer.Option(3, help="Min user turns per session"),
     since: str = typer.Option(None, help="Only sessions started after YYYY-MM-DD"),
     include_tools: bool = typer.Option(True, help="Emit tool-call trajectory variant"),
-    val_frac: float = typer.Option(0.05, help="Validation split fraction"),
+    val_frac: float = typer.Option(0.15, help="Validation split fraction"),
 ):
     """Export quality-filtered sessions as SFT chat-format JSONL."""
     from .export.sft import run_export
