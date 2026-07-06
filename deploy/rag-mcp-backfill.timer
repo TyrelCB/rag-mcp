@@ -1,0 +1,10 @@
+[Unit]
+Description=Run rag-mcp incremental backfill every 6 hours
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=6h
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=rag-mcp incremental backfill (catches long-lived sessions before they end)
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projects/rag-mcp
+ExecStart=%h/projects/rag-mcp/.venv/bin/rag-mcp backfill --source all
+Environment=RAG_DISTILL_MODEL=GLM-4.7-Flash-REAP-23B-A3B-IQ4_XL-T-128k
+Nice=10
