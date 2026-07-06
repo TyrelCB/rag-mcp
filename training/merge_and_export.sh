@@ -38,7 +38,10 @@ print("merged")
 EOF
 fi
 
-python3 "$LLAMA_CPP/convert_hf_to_gguf.py" "$MERGED" --outtype bf16 --outfile "$RUN_DIR/model-bf16.gguf"
+# --no-mtp: AutoModelForCausalLM drops Qwen3.5/3.6 MTP tensors at load, so the
+# merged checkpoint has none; without the flag the GGUF declares an MTP block
+# it can't fill and fails at serve time with "missing tensor blk.N.attn_norm".
+python3 "$LLAMA_CPP/convert_hf_to_gguf.py" "$MERGED" --outtype bf16 --outfile "$RUN_DIR/model-bf16.gguf" --no-mtp
 "$LLAMA_CPP/build/bin/llama-quantize" "$RUN_DIR/model-bf16.gguf" "$GGUF" Q4_K_M
 rm -f "$RUN_DIR/model-bf16.gguf"
 

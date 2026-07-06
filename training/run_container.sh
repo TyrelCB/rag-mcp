@@ -9,7 +9,9 @@ HF_CACHE="${HF_HOME:-$HOME/.cache/huggingface}"
 
 mkdir -p "$HF_CACHE"
 
-TTY_FLAGS=""
+# always -i so heredoc/pipe stdin reaches the containerized command; add a
+# TTY only when we actually have one
+TTY_FLAGS="-i"
 [ -t 0 ] && TTY_FLAGS="-it"
 
 docker run --rm $TTY_FLAGS \
