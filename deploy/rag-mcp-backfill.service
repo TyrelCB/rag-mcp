@@ -6,5 +6,5 @@ After=network.target
 Type=oneshot
 WorkingDirectory=%h/projects/rag-mcp
 ExecStart=%h/projects/rag-mcp/.venv/bin/rag-mcp backfill --source all
-Environment=RAG_DISTILL_MODEL=GLM-4.7-Flash-REAP-23B-A3B-IQ4_XL-T-128k
+Environment=RAG_DISTILL_MODEL=Qwen3.6-35b-1M-P1-MTP-NGRAM
 Nice=10

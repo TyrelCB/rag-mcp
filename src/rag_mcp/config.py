@@ -19,8 +19,8 @@ class Config:
             _env("RAG_DB", str(HOME / ".local/share/rag-mcp/rag.db"))
         ).expanduser()
     )
-    embed_url: str = _env("RAG_EMBED_URL", "http://127.0.0.1:11434")
-    embed_model: str = _env("RAG_EMBED_MODEL", "qwen3-embedding:0.6b")
+    embed_url: str = _env("RAG_EMBED_URL", "http://127.0.0.1:9090/v1")
+    embed_model: str = _env("RAG_EMBED_MODEL", "qwen3-embedding-0.6b")
     embed_dim: int = int(_env("RAG_EMBED_DIM", "1024"))
     distill_url: str = _env("RAG_DISTILL_URL", "http://127.0.0.1:9090/v1")
     distill_model: str = _env("RAG_DISTILL_MODEL", "")  # empty = first from /v1/models

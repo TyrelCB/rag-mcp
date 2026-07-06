@@ -1,5 +1,6 @@
-"""Ollama embedding client. qwen3-embedding is instruction-aware: queries get an
-instruct prefix, documents are embedded raw."""
+"""Embedding client for the llama.cpp router (OpenAI /v1/embeddings API).
+qwen3-embedding is instruction-aware: queries get an instruct prefix, documents
+are embedded raw."""
 
 import httpx
 
@@ -24,11 +25,12 @@ async def embed_texts(cfg: Config, texts: list[str], *, is_query: bool = False) 
             for attempt in (1, 2):
                 try:
                     r = await client.post(
-                        f"{cfg.embed_url}/api/embed",
+                        f"{cfg.embed_url}/embeddings",
                         json={"model": cfg.embed_model, "input": batch},
                     )
                     r.raise_for_status()
-                    out.extend(r.json()["embeddings"])
+                    data = r.json()["data"]
+                    out.extend(d["embedding"] for d in sorted(data, key=lambda d: d["index"]))
                     break
                 except Exception:
                     if attempt == 2:

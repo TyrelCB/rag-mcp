@@ -20,8 +20,8 @@ One persistent service (port **8004**, systemd user unit `rag-mcp`) provides:
 Claude Code SessionEnd  ─┐
 Hermes on_session_end   ─┼─► POST /api/ingest ─► queue ─► parse ─► junk filter
                          │      (pending_jobs table survives restarts)
-                         │   ─► distill (llama.cpp :9090, GLM-4.7-Flash) ─► chunk
-                         │   ─► scrub secrets ─► embed (ollama qwen3-embedding:0.6b)
+                         │   ─► distill (llama.cpp :9090, Qwen3.6-35b-1M) ─► chunk
+                         │   ─► scrub secrets ─► embed (llama.cpp :9090, qwen3-embedding-0.6b)
                          │   ─► SQLite: chunks + FTS5 + sqlite-vec
 Claude Code UserPromptSubmit ─► POST /api/context ─► vec KNN + BM25 → RRF → boosts
                                  → dedupe (per-session `injected` cache) → inject
@@ -44,7 +44,7 @@ rag-mcp status
 rag-mcp backfill --source all     # seed from existing history (--no-distill for speed)
 rag-mcp ingest <path> --source claude
 rag-mcp export --out data/sft-$(date +%Y%m%d) --min-turns 3
-rag-mcp reembed --model <ollama-tag> --dim <n>   # switch embedding models
+rag-mcp reembed --model <router-model-id> --dim <n>   # switch embedding models
 ```
 
 ## Fine-tuning (training/)
@@ -62,10 +62,11 @@ rag-mcp reembed --model <ollama-tag> --dim <n>   # switch embedding models
 
 ## Config (env)
 
-`PORT` (8004) · `RAG_DB` · `RAG_EMBED_URL`/`RAG_EMBED_MODEL` (ollama,
-qwen3-embedding:0.6b, dim recorded in `meta`; mismatch refuses startup) ·
-`RAG_DISTILL_URL`/`RAG_DISTILL_MODEL` (llama.cpp :9090) · `RAG_CONTEXT_TOKENS`
-(1500) · `RAG_MIN_SESSION_CHARS` (700).
+`PORT` (8004) · `RAG_DB` · `RAG_EMBED_URL`/`RAG_EMBED_MODEL` (llama.cpp router
+`/v1/embeddings`, qwen3-embedding-0.6b via `~/models/presets.ini`, dim recorded
+in `meta`; mismatch refuses startup) · `RAG_DISTILL_URL`/`RAG_DISTILL_MODEL`
+(llama.cpp :9090, Qwen3.6-35b-1M-P1-MTP-NGRAM) · `RAG_CONTEXT_TOKENS` (1500) ·
+`RAG_MIN_SESSION_CHARS` (700).
 
 ## Dev
 
