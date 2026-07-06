@@ -1,0 +1,5 @@
+# Rendered by merge_and_export.sh — do not edit the generated copy.
+FROM {{GGUF_PATH}}
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER num_ctx 16384

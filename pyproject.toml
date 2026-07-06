@@ -1,0 +1,25 @@
+[project]
+name = "rag-mcp"
+version = "0.1.0"
+description = "Hybrid RAG over Claude Code and Hermes session history: hook-driven ingestion, context injection, MCP tools, SFT export."
+readme = "README.md"
+authors = [
+    { name = "Ty", email = "Ty@spark" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.3",
+    "sqlite-vec>=0.1.6",
+    "httpx>=0.27",
+    "typer>=0.12",
+]
+
+[project.scripts]
+rag-mcp = "rag_mcp.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"

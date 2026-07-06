@@ -1,0 +1,3 @@
+rag.mcp.tyrel.cloud {
+	import mcp_proxy 8004
+}

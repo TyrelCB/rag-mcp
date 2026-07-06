@@ -1,0 +1,7 @@
+{"role":"system","content":"You are Hermes, a giant system prompt that should be dropped entirely.","timestamp":"2026-06-20T09:00:00Z"}
+{"role":"user","content":"what services are running on the spark box right now?","timestamp":"2026-06-20T09:00:01Z"}
+{"role":"assistant","content":"","tool_calls":[{"id":"c1","type":"function","function":{"name":"shell","arguments":"{\"cmd\": \"systemctl --user list-units\"}"}}],"timestamp":"2026-06-20T09:00:02Z"}
+{"role":"tool","content":"hermes-gateway.service running\nhermes-dashboard.service running\ncomfyui.service running","tool_call_id":"c1","timestamp":"2026-06-20T09:00:03Z"}
+{"role":"assistant","content":"Three user services are running: hermes-gateway, hermes-dashboard, and comfyui.","timestamp":"2026-06-20T09:00:04Z"}
+{"role":"user","content":"cool, remember comfyui runs on port 8188 so nothing else should claim it","timestamp":"2026-06-20T09:00:10Z"}
+{"role":"assistant","content":"Noted: ComfyUI owns port 8188 on this box; other services must not claim it.","timestamp":"2026-06-20T09:00:12Z"}

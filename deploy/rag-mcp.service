@@ -1,0 +1,14 @@
+[Unit]
+Description=rag-mcp RAG MCP Server
+After=network.target
+
+[Service]
+WorkingDirectory=%h/projects/rag-mcp
+ExecStart=%h/projects/rag-mcp/.venv/bin/rag-mcp serve
+Environment=PORT=8004
+Environment=RAG_DISTILL_MODEL=GLM-4.7-Flash-REAP-23B-A3B-IQ4_XL-T-128k
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
