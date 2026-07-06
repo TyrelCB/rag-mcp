@@ -58,7 +58,8 @@ rag-mcp reembed --model <router-model-id> --dim <n>   # switch embedding models
    via TRL/PEFT inside the NGC pytorch container (aarch64; no bitsandbytes).
    Smoke: `--base Qwen/Qwen3-0.6B --max-steps 2`.
 3. `training/merge_and_export.sh runs/my-run Qwen/Qwen3.5-9B tyrel-tuned-qwen` —
-   merge → GGUF (`~/llama.cpp`) → Q4_K_M → `ollama create`.
+   merge → GGUF (`~/llama.cpp`) → Q4_K_M → preset in `~/models/presets.ini`,
+   served by the llama.cpp router on :9090.
 
 ## Config (env)
 
