@@ -28,6 +28,13 @@ def main():
     ap.add_argument("--max-seq-len", type=int, default=8192)
     ap.add_argument("--batch-size", type=int, default=1)
     ap.add_argument("--grad-accum", type=int, default=8)
+    ap.add_argument("--target-preset", choices=["all", "attn"], default="all",
+                    help="'all' = all-linear (dense models). 'attn' = attention/"
+                         "linear-attn projections only — use for MoE bases like "
+                         "Qwen3.6-35B-A3B (avoids per-expert LoRA modules) and for "
+                         "faster runs on dense models.")
+    ap.add_argument("--no-packing", action="store_true",
+                    help="Disable sequence packing even when flash-attn is available")
     args = ap.parse_args()
 
     import torch
@@ -43,19 +50,36 @@ def main():
         data_files["validation"] = args.val
     ds = load_dataset("json", data_files=data_files)
 
+    # flash-attn enables packing (sdpa cross-contaminates packed samples)
+    try:
+        import flash_attn  # noqa: F401
+        attn_impl, packing = "flash_attention_2", True
+    except ImportError:
+        attn_impl, packing = "sdpa", False
+    if args.no_packing:
+        packing = False
+    print(f"attn={attn_impl} packing={packing} targets={args.target_preset}")
+
     tokenizer = AutoTokenizer.from_pretrained(args.base)
     model = AutoModelForCausalLM.from_pretrained(
         args.base,
         torch_dtype=torch.bfloat16,   # plain bf16 LoRA; no bitsandbytes on aarch64
         device_map="auto",
-        attn_implementation="sdpa",
+        attn_implementation=attn_impl,
     )
+
+    if args.target_preset == "attn":
+        # full-attention + linear-attention (gated delta net) projections;
+        # deliberately skips MoE expert MLPs
+        target_modules = r".*(self_attn|linear_attn)\..*proj[a-z_]*"
+    else:
+        target_modules = "all-linear"
 
     peft_config = LoraConfig(
         r=args.rank,
         lora_alpha=args.alpha,
         lora_dropout=0.05,
-        target_modules="all-linear",
+        target_modules=target_modules,
         task_type="CAUSAL_LM",
     )
 
@@ -75,9 +99,7 @@ def main():
         save_strategy="epoch" if args.max_steps < 0 else "no",
         eval_strategy="epoch" if args.val else "no",
         max_length=args.max_seq_len,
-        # packing off: sdpa (no flash-attn here) can cross-contaminate packed
-        # samples, and the dataset is small enough that packing buys nothing
-        packing=False,
+        packing=packing,
         report_to=[],
     )
 
