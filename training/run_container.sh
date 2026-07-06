@@ -18,6 +18,7 @@ docker run --rm $TTY_FLAGS \
   --gpus all \
   --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
+  ${HF_TOKEN:+-e HF_TOKEN} \
   -v "$PROJECT_DIR:/ws" \
   -v "$HF_CACHE:/root/.cache/huggingface" \
   -w /ws/training \
